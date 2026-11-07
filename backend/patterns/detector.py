@@ -290,7 +290,7 @@ def detect_chart_formations(df: pd.DataFrame, timeframe: str) -> List[PatternDet
         h1, h2 = high_pivots[-2], high_pivots[-1]
         l1, l2 = low_pivots[-2], low_pivots[-1]
         high_diff = abs(h1.price - h2.price) / h1.price
-        if high_diff <= 0.012 and l2.price > l1.price:
+        if high_diff <= 0.015 and l2.price > l1.price:
             formations.append(PatternDetection(
                 id=str(uuid.uuid4())[:12],
                 pattern_name="Ascending Triangle",
@@ -305,12 +305,158 @@ def detect_chart_formations(df: pd.DataFrame, timeframe: str) -> List[PatternDet
                 is_confirmed=float(df["close"].iloc[-1]) > max(h1.price, h2.price),
             ))
 
-    # 4. Bullish Flag
+    # 4. Descending Triangle (Flat support floor, lower highs)
+    if len(high_pivots) >= 2 and len(low_pivots) >= 2:
+        h1, h2 = high_pivots[-2], high_pivots[-1]
+        l1, l2 = low_pivots[-2], low_pivots[-1]
+        low_diff = abs(l1.price - l2.price) / l1.price
+        if low_diff <= 0.015 and h2.price < h1.price:
+            formations.append(PatternDetection(
+                id=str(uuid.uuid4())[:12],
+                pattern_name="Descending Triangle",
+                pattern_category="CHART_FORMATION",
+                stance="BEARISH",
+                timeframe=timeframe,
+                formation_start=min(h1.open_time, l1.open_time),
+                confirmation_time=max(h2.confirmation_time, l2.confirmation_time),
+                price_levels={"horizontal_support": round((l1.price + l2.price) / 2, 2), "descending_high": h2.price},
+                detection_conditions={"lower_highs": True, "flat_floor": True},
+                quality_score=0.75,
+                is_confirmed=float(df["close"].iloc[-1]) < min(l1.price, l2.price),
+            ))
+
+    # 5. Symmetrical Triangle (Lower highs and higher lows converging)
+    if len(high_pivots) >= 2 and len(low_pivots) >= 2:
+        h1, h2 = high_pivots[-2], high_pivots[-1]
+        l1, l2 = low_pivots[-2], low_pivots[-1]
+        if h2.price < h1.price and l2.price > l1.price:
+            # Check converging range
+            range_start = h1.price - l1.price
+            range_end = h2.price - l2.price
+            if 0 < range_end < range_start:
+                curr_close = float(df["close"].iloc[-1])
+                is_breakout_up = curr_close > h2.price
+                is_breakdown_dn = curr_close < l2.price
+                stance = "BULLISH" if is_breakout_up else ("BEARISH" if is_breakdown_dn else "NEUTRAL")
+                formations.append(PatternDetection(
+                    id=str(uuid.uuid4())[:12],
+                    pattern_name="Symmetrical Triangle",
+                    pattern_category="CHART_FORMATION",
+                    stance=stance,
+                    timeframe=timeframe,
+                    formation_start=min(h1.open_time, l1.open_time),
+                    confirmation_time=max(h2.confirmation_time, l2.confirmation_time),
+                    price_levels={"upper_trendline": h2.price, "lower_trendline": l2.price},
+                    detection_conditions={"compression_ratio": round(range_end / range_start, 2)},
+                    quality_score=0.70,
+                    is_confirmed=is_breakout_up or is_breakdown_dn,
+                ))
+
+    # 6. Head and Shoulders (Left Shoulder, Head, Right Shoulder)
+    if len(high_pivots) >= 3:
+        ls, head, rs = high_pivots[-3], high_pivots[-2], high_pivots[-1]
+        if head.price > ls.price and head.price > rs.price:
+            shoulder_symmetry = abs(ls.price - rs.price) / ls.price
+            if shoulder_symmetry <= 0.04:
+                # Find neckline lows
+                troughs = [p for p in low_pivots if ls.open_time < p.open_time < rs.open_time]
+                if len(troughs) >= 2:
+                    nl = round((troughs[0].price + troughs[1].price) / 2.0, 2)
+                    curr_close = float(df["close"].iloc[-1])
+                    is_confirmed = curr_close < nl
+                    formations.append(PatternDetection(
+                        id=str(uuid.uuid4())[:12],
+                        pattern_name="Head and Shoulders",
+                        pattern_category="CHART_FORMATION",
+                        stance="BEARISH",
+                        timeframe=timeframe,
+                        formation_start=ls.open_time,
+                        confirmation_time=rs.confirmation_time,
+                        price_levels={"left_shoulder": ls.price, "head": head.price, "right_shoulder": rs.price, "neckline": nl},
+                        detection_conditions={"shoulder_symmetry_pct": round(shoulder_symmetry * 100, 2), "troughs_count": len(troughs)},
+                        quality_score=0.85 if is_confirmed else 0.65,
+                        is_confirmed=is_confirmed,
+                    ))
+
+    # 7. Inverse Head and Shoulders
+    if len(low_pivots) >= 3:
+        ls, head, rs = low_pivots[-3], low_pivots[-2], low_pivots[-1]
+        if head.price < ls.price and head.price < rs.price:
+            shoulder_symmetry = abs(ls.price - rs.price) / ls.price
+            if shoulder_symmetry <= 0.04:
+                peaks = [p for p in high_pivots if ls.open_time < p.open_time < rs.open_time]
+                if len(peaks) >= 2:
+                    nl = round((peaks[0].price + peaks[1].price) / 2.0, 2)
+                    curr_close = float(df["close"].iloc[-1])
+                    is_confirmed = curr_close > nl
+                    formations.append(PatternDetection(
+                        id=str(uuid.uuid4())[:12],
+                        pattern_name="Inverse Head and Shoulders",
+                        pattern_category="CHART_FORMATION",
+                        stance="BULLISH",
+                        timeframe=timeframe,
+                        formation_start=ls.open_time,
+                        confirmation_time=rs.confirmation_time,
+                        price_levels={"left_shoulder": ls.price, "head": head.price, "right_shoulder": rs.price, "neckline": nl},
+                        detection_conditions={"shoulder_symmetry_pct": round(shoulder_symmetry * 100, 2), "peaks_count": len(peaks)},
+                        quality_score=0.85 if is_confirmed else 0.65,
+                        is_confirmed=is_confirmed,
+                    ))
+
+    # 8. Rising Wedge (Higher highs & higher lows converging upward, bearish reversal/continuation)
+    if len(high_pivots) >= 2 and len(low_pivots) >= 2:
+        h1, h2 = high_pivots[-2], high_pivots[-1]
+        l1, l2 = low_pivots[-2], low_pivots[-1]
+        if h2.price > h1.price and l2.price > l1.price:
+            high_slope = (h2.price - h1.price) / h1.price
+            low_slope = (l2.price - l1.price) / l1.price
+            if low_slope > high_slope:  # Lows rising faster than highs = converging upward
+                curr_close = float(df["close"].iloc[-1])
+                is_confirmed = curr_close < l2.price
+                formations.append(PatternDetection(
+                    id=str(uuid.uuid4())[:12],
+                    pattern_name="Rising Wedge",
+                    pattern_category="CHART_FORMATION",
+                    stance="BEARISH",
+                    timeframe=timeframe,
+                    formation_start=min(h1.open_time, l1.open_time),
+                    confirmation_time=max(h2.confirmation_time, l2.confirmation_time),
+                    price_levels={"wedge_upper": h2.price, "wedge_lower": l2.price},
+                    detection_conditions={"converging_up": True, "high_slope": round(high_slope, 4), "low_slope": round(low_slope, 4)},
+                    quality_score=0.76 if is_confirmed else 0.60,
+                    is_confirmed=is_confirmed,
+                ))
+
+    # 9. Falling Wedge (Lower highs & lower lows converging downward, bullish reversal/continuation)
+    if len(high_pivots) >= 2 and len(low_pivots) >= 2:
+        h1, h2 = high_pivots[-2], high_pivots[-1]
+        l1, l2 = low_pivots[-2], low_pivots[-1]
+        if h2.price < h1.price and l2.price < l1.price:
+            high_drop = (h1.price - h2.price) / h1.price
+            low_drop = (l1.price - l2.price) / l1.price
+            if high_drop > low_drop:  # Highs falling faster than lows = converging downward
+                curr_close = float(df["close"].iloc[-1])
+                is_confirmed = curr_close > h2.price
+                formations.append(PatternDetection(
+                    id=str(uuid.uuid4())[:12],
+                    pattern_name="Falling Wedge",
+                    pattern_category="CHART_FORMATION",
+                    stance="BULLISH",
+                    timeframe=timeframe,
+                    formation_start=min(h1.open_time, l1.open_time),
+                    confirmation_time=max(h2.confirmation_time, l2.confirmation_time),
+                    price_levels={"wedge_upper": h2.price, "wedge_lower": l2.price},
+                    detection_conditions={"converging_down": True, "high_drop": round(high_drop, 4), "low_drop": round(low_drop, 4)},
+                    quality_score=0.76 if is_confirmed else 0.60,
+                    is_confirmed=is_confirmed,
+                ))
+
+    # 10. Bullish Flag
     # Strong prior impulse up followed by tight downward consolidation
     if len(df) >= 20:
         impulse_return = (df["close"].iloc[-10] - df["close"].iloc[-20]) / df["close"].iloc[-20]
         recent_consolidation_return = (df["close"].iloc[-1] - df["close"].iloc[-10]) / df["close"].iloc[-10]
-        if impulse_return >= 0.04 and -0.025 <= recent_consolidation_return <= 0.005:
+        if impulse_return >= 0.04 and -0.03 <= recent_consolidation_return <= 0.005:
             formations.append(PatternDetection(
                 id=str(uuid.uuid4())[:12],
                 pattern_name="Bullish Flag",
@@ -323,6 +469,26 @@ def detect_chart_formations(df: pd.DataFrame, timeframe: str) -> List[PatternDet
                 detection_conditions={"impulse_pct": round(impulse_return * 100, 2), "consolidation_pct": round(recent_consolidation_return * 100, 2)},
                 quality_score=0.78,
                 is_confirmed=float(df["close"].iloc[-1]) > float(df["high"].iloc[-5]),
+            ))
+
+    # 11. Bearish Flag
+    # Strong prior impulse down followed by tight upward consolidation
+    if len(df) >= 20:
+        impulse_return = (df["close"].iloc[-10] - df["close"].iloc[-20]) / df["close"].iloc[-20]
+        recent_consolidation_return = (df["close"].iloc[-1] - df["close"].iloc[-10]) / df["close"].iloc[-10]
+        if impulse_return <= -0.04 and -0.005 <= recent_consolidation_return <= 0.03:
+            formations.append(PatternDetection(
+                id=str(uuid.uuid4())[:12],
+                pattern_name="Bearish Flag",
+                pattern_category="CHART_FORMATION",
+                stance="BEARISH",
+                timeframe=timeframe,
+                formation_start=int(df["open_time"].iloc[-20]),
+                confirmation_time=int(df["open_time"].iloc[-1]),
+                price_levels={"pole_base": float(df["close"].iloc[-20]), "flag_low": float(df["low"].iloc[-10]), "flag_high": float(df["high"].iloc[-5:].max())},
+                detection_conditions={"impulse_pct": round(impulse_return * 100, 2), "consolidation_pct": round(recent_consolidation_return * 100, 2)},
+                quality_score=0.78,
+                is_confirmed=float(df["close"].iloc[-1]) < float(df["low"].iloc[-5]),
             ))
 
     return formations

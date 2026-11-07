@@ -125,3 +125,38 @@ def test_wilson_interval():
     low, high = compute_wilson_score_interval(0.6, 100)
     assert 0.0 < low < 0.6 < high < 1.0
 
+
+def test_paper_journal_fees_and_slippage():
+    from backend.paper_journal.journal import PaperJournalManager
+    mgr = PaperJournalManager()
+
+    # Enter a long position at 1000.0
+    rec = mgr.record_signal(
+        symbol="BTCUSDT",
+        timeframe="4h",
+        stance="BULLISH",
+        entry_price=1000.0,
+        target_price=1100.0,
+        stop_loss=950.0,
+        horizon_hours=24,
+    )
+    assert rec.entry_price == 1000.0
+    assert rec.fee_pct == 0.05
+    assert rec.slippage_pct == 0.05
+    assert rec.status == "OPEN"
+
+    # Simulate price reaching target at 1100.0
+    mgr.update_settlements(1105.0, "BTCUSDT")
+
+    records = mgr.list_records(limit=10)
+    matching = [r for r in records if r.id == rec.id]
+    assert len(matching) == 1
+    settled = matching[0]
+    assert settled.status == "WIN"
+    assert settled.exit_price == 1100.0
+    # Gross return: (1100 - 1000) / 1000 = +10.0%
+    assert settled.gross_pnl_pct == 10.0
+    # Total friction: 2 * fee (0.05% * 2 = 0.10%) + 2 * slippage (0.05% * 2 = 0.10%) = 0.20%
+    # Net return: 10.0% - 0.20% = +9.80%
+    assert settled.net_pnl_pct == 9.80
+

@@ -6,6 +6,8 @@ import os
 import time
 from contextlib import asynccontextmanager
 from typing import Dict, Any, List, Optional
+import numpy as np
+import pandas as pd
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,7 +22,7 @@ from backend.kronos.manager import model_manager
 from backend.indicators.technical import compute_indicators
 from backend.market_structure.structure import analyze_market_structure
 from backend.patterns.detector import detect_all_patterns
-from backend.calibration.calibrator import calibrate_forecast
+from backend.calibration.calibrator import calibrate_forecast, CalibratedConfidence
 from backend.forecasting.intelligence import synthesize_market_intelligence, SynthesisResult
 from backend.backtesting.engine import BacktestWalkForwardEngine
 from backend.paper_journal.journal import paper_journal_manager
