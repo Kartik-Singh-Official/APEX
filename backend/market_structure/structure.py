@@ -281,3 +281,4 @@ def analyze_market_structure(df: pd.DataFrame) -> MarketStructureAnalysis:
         range_high=range_high,
         range_low=range_low,
     )
+

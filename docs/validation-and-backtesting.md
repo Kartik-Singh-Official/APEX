@@ -46,3 +46,4 @@ A forecasting model is mathematically unproven unless it demonstrably outperform
   Measures probabilistic calibration ($0.25$ represents uninformative random guessing).
 - **Outperformance Rule**:
   If a model's MAE exceeds the No-Change baseline, APEX flags the model as underperforming on that horizon and suppresses aggressive research stances.
+

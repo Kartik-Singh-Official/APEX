@@ -42,3 +42,4 @@ class DataHealthInfo(BaseModel):
     last_error: Optional[str] = None
     active_symbols: list[str] = []
     active_timeframes: list[str] = []
+

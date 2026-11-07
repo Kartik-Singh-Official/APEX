@@ -182,3 +182,4 @@ export const BottomMultiPane: React.FC<BottomMultiPaneProps> = ({
     </footer>
   );
 };
+

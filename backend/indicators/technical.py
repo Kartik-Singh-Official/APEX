@@ -152,3 +152,4 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     res["obv"] = compute_obv(c, v)
 
     return res
+

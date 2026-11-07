@@ -34,3 +34,4 @@ APEX derives directional probability and empirical forecast corridors strictly f
 4. **Empirical Prediction Bands (80% and 95%)**:
    Rather than assuming Gaussian returns (which fail in crypto due to fat tails), the upper and lower forecast cones are built directly from the empirical $2.5\%$, $10\%$, $90\%$, and $97.5\%$ quantiles of historical out-of-sample residuals:
    $$\text{Range}_{95\%} = \left[ \hat{P}_{\text{target}} \cdot (1 + q_{0.025}), \; \hat{P}_{\text{target}} \cdot (1 + q_{0.975}) \right]$$
+

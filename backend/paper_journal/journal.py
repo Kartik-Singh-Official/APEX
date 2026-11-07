@@ -229,3 +229,4 @@ class PaperJournalManager:
 
 
 paper_journal_manager = PaperJournalManager()
+

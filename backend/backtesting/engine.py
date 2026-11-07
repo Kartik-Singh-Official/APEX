@@ -201,3 +201,4 @@ class BacktestWalkForwardEngine:
             outperforms_no_change=bool(mae < no_change_mae),
             evaluation_time_s=round(eval_time, 2),
         )
+

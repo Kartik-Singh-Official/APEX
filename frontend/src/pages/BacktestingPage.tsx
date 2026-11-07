@@ -230,3 +230,4 @@ export const BacktestingPage: React.FC<BacktestingPageProps> = ({
     </div>
   );
 };
+

@@ -136,3 +136,4 @@ class BinanceWsClient:
             self._notify(candle)
         except Exception as e:
             logger.error(f"Error handling WebSocket message: {e}")
+

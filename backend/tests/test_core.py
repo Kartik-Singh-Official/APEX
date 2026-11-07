@@ -124,3 +124,4 @@ def test_calibrated_confidence_threshold():
 def test_wilson_interval():
     low, high = compute_wilson_score_interval(0.6, 100)
     assert 0.0 < low < 0.6 < high < 1.0
+

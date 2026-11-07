@@ -186,3 +186,4 @@ class CandleRepository:
             active_symbols=settings.supported_symbols,
             active_timeframes=settings.supported_timeframes,
         )
+

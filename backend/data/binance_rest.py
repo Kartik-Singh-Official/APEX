@@ -178,3 +178,4 @@ class BinanceRestClient:
                 missing_count += skipped
 
         return sorted_candles, missing_count
+

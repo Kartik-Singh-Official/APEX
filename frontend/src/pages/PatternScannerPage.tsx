@@ -167,3 +167,4 @@ export const PatternScannerPage: React.FC<PatternScannerPageProps> = ({
     </div>
   );
 };
+

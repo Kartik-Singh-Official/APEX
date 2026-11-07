@@ -46,3 +46,4 @@ In accordance with Kronos requirements, input series must be chronological and s
 - Temporal timestamp calendar features:
   - `minute`, `hour`, `weekday`, `day`, `month`
 - Autoregressive multi-step decoding produces future OHLCV sequences preserving exact UTC timestamps.
+

@@ -138,3 +138,4 @@ CREATE TABLE IF NOT EXISTS data_health_logs (
     timestamp INTEGER NOT NULL
 );
 """
+

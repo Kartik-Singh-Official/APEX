@@ -74,3 +74,4 @@ PYTHONPATH=. pytest backend/tests/ -v
 | **Kronos-base** | `2b554741eca47781b64468546e77fef3e85130e6` | `NeoQuasar/Kronos-Tokenizer-base` (`0e01173`) | 102.5M | 390.30 MB |
 
 Upstream Git Commit: `67b630e67f6a18c9e9be918d9b4337c960db1e9a` (ShiYu/Kronos, MIT License).
+

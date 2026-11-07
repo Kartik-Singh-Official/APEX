@@ -231,3 +231,4 @@ export const RightAnalysisPanel: React.FC<RightAnalysisPanelProps> = ({
     </aside>
   );
 };
+

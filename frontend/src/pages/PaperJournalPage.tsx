@@ -156,3 +156,4 @@ export const PaperJournalPage: React.FC<PaperJournalPageProps> = ({ records }) =
     </div>
   );
 };
+

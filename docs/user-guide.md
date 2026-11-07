@@ -73,3 +73,4 @@ To execute the unit and integration tests:
 source .venv/bin/activate
 PYTHONPATH=. pytest backend/tests/ -v
 ```
+

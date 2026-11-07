@@ -249,3 +249,4 @@ class KronosModelManager:
 
 # Global singleton instance
 model_manager = KronosModelManager()
+

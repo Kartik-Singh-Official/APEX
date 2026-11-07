@@ -206,3 +206,4 @@ def synthesize_market_intelligence(
         data_quality_status=data_quality,
         explanation_narrative=narrative,
     )
+

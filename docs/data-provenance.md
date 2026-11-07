@@ -63,3 +63,4 @@ Every stored candle record in SQLite carries immutable provenance fields:
 - If $\Delta t > \text{interval\_ms}$, missing candle count is incremented:
   $$\text{gaps} = \left\lfloor \frac{\Delta t - \text{interval\_ms}}{\text{interval\_ms}} \right\rfloor$$
 - Missing intervals are displayed prominently on the Data Health screen.
+

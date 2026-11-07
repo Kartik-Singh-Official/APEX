@@ -336,3 +336,4 @@ def detect_all_patterns(df: pd.DataFrame, timeframe: str) -> List[PatternDetecti
     # Sort chronologically by confirmation time descending (newest first)
     combined.sort(key=lambda p: p.confirmation_time, reverse=True)
     return combined
+

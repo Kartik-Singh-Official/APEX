@@ -281,3 +281,4 @@ export const ForecastLabPage: React.FC<ForecastLabPageProps> = ({
     </div>
   );
 };
+

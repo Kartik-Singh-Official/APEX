@@ -74,3 +74,4 @@ APEX/
    - Synchronous data retrieval for historical candles, indicator series, market structure, pattern tables, backtest summaries, and paper journal operations.
 2. **WebSocket (ws://localhost:8000/ws/stream)**:
    - Full-duplex persistent stream receiving live candle ticks (`k.x == false`) and closed candle notifications (`k.x == true`) from Binance spot streams, broadcasting in real time to connected UI terminals.
+
